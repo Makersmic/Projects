@@ -1,1 +1,2 @@
 
+The Excel workbooks contained within were inspired by professional work i have achieved and hopefully demonstrate some my abilities working with MS Excel.  These workbooks were authored to not only contain simple features such as macros but also VBA content that enables content to be supported through Access databases, Outlook, and Adobe Acrobat.  Please feel free to copy and alter the content and if you decide to distribute please leave appropriate attributions
