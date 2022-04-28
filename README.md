@@ -1,0 +1,1 @@
+A small collection of projects that I have developed.  These projects were developed by myself, Mike Fisher.  Please feel free to browse or download any of the files that are available.  If modifications are made and you wish to publish the files please notify me by email at mfisher6789@gmail.com
