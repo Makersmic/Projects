@@ -1,0 +1,1 @@
+This was created to address the redundant actions taken by associates in a corporation.  A several step verification form, this is good for organizations that require projects or purchases to be reviewed and approved by several parties before finally going to purchasing agent for a final transaction.
