@@ -1,1 +1,6 @@
 
+This is an excel workbook that helps an organization keep track of tooling designs in various aspects.  There are 8 major componments of this project, they are as follows:
+Tooling Style A Search -Allows a user to view tooling that fall within exact parameters given by a user.  To allow for entries with similar characteristics multiple search result fields have been allowed.  Users may also view pdf drawings of tooling through the usage Adobe Acrobat.
+Tooling Style B Search - Allows a user to view search results that are close if not exact to what their search criteria may be.  Search allows for multiple results at a time and like the first first search engine, it allows a user to view pdf drawings of the desired tooling.
+Tooling Style A & B Backend - An Excel derived interface that allows a user to enter in specific information about tooling.  In addition to fields provided for a user, VBA coding is present to allow for 'error checking' if a field has information that should not be present or will not play nice with other aspects of the workbook.  This allows for consistent information to be promoted when entering in information.
+Access Database - not only is all tooling information held within an Access database but also user login information as well.
