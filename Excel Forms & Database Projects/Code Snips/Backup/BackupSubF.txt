@@ -1,0 +1,85 @@
+Sub CopyDBBackup()
+'copy all the database files (.accb and .mdb) and their file structure to the backup folder
+   Dim FSO As Object
+    Dim SourceFolder As Object
+    Dim BackupFolder As String
+    Dim SubFolder As Object
+    Dim FileItem As Object
+    Dim db As Object
+    Dim strSQL As String
+    Dim relativePath As String
+
+    ' Set the source folder and backup folder paths
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    Set SourceFolder = FSO.GetFolder("\\10.1.30.96\common\Change Sheet\")
+    BackupFolder = "\\10.1.30.96\common\CGBACKUP\BACKUPS\CGBKB " & Format(Now(), "yyyy-mm-dd")
+
+    ' Create the backup folder if it does not exist
+    If Not FSO.FolderExists(BackupFolder) Then
+        FSO.CreateFolder BackupFolder
+    End If
+
+    ' Loop through all the Access files in the source folder and its subfolders
+    For Each SubFolder In SourceFolder.SubFolders
+        ' Copy the subfolder to the backup folder
+        relativePath = GetRelativePath(SourceFolder.Path, SubFolder.Path)
+        If Not FSO.FolderExists(BackupFolder & "\" & relativePath) Then
+            FSO.CreateFolder BackupFolder & "\" & relativePath
+        End If
+        FSO.CopyFolder SubFolder.Path, BackupFolder & "\" & relativePath
+
+        ' Loop through all the Access files in the current subfolder
+        For Each FileItem In SubFolder.Files
+            If Right(FileItem.name, 4) = ".accdb" Or Right(FileItem.name, 4) = ".mdb" Then
+                ' Copy the file to the backup folder
+                FSO.CopyFile FileItem.Path, BackupFolder & "\" & relativePath & "\" & FileItem.name
+
+                ' Open the database and wipe all the data except for the last 2 entries
+                Set db = CreateObject("DAO.DBEngine.120").OpenDatabase(FileItem.Path)
+                strSQL = "DELETE FROM TableName WHERE ID NOT IN (SELECT TOP 2 ID FROM TableName ORDER BY ID DESC)"
+                db.Execute strSQL
+                db.Close
+            End If
+        Next FileItem
+    Next SubFolder
+
+    ' Notify the user when the backup is complete
+    MsgBox "Backup complete!", vbInformation
+End Sub
+
+Function GetRelativePath(ByVal baseFolder As String, ByVal targetPath As String) As String
+'function for getting the folder structure of the backup folder
+    Dim baseArray() As String
+    Dim targetArray() As String
+    Dim minLen As Long
+    Dim i As Long
+    Dim relPath As String
+
+    ' Convert folder paths to arrays of folder names
+    baseArray = Split(baseFolder, "\")
+    targetArray = Split(targetPath, "\")
+
+    ' Find the minimum length of the two arrays
+    minLen = IIf(UBound(baseArray) < UBound(targetArray), UBound(baseArray), UBound(targetArray))
+
+    ' Loop through the arrays and find the first folder that differs
+    For i = 0 To minLen
+        If StrComp(baseArray(i), targetArray(i), vbTextCompare) <> 0 Then
+            Exit For
+        End If
+    Next i
+
+    ' Create the relative path by adding "..\" for each remaining folder in the base array
+    For j = i To UBound(baseArray) - 1
+        relPath = relPath & "..\"
+    Next j
+
+    ' Add the remaining folders from the target array to the relative path
+    For k = i To UBound(targetArray)
+        relPath = relPath & targetArray(k) & "\"
+    Next k
+
+    ' Remove the trailing backslash and return the relative path
+    GetRelativePath = Left(relPath, Len(relPath) - 1)
+End Function
+
