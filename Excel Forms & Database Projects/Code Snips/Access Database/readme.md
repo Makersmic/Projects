@@ -1,1 +1,1 @@
-
+As you have probably guessed this folder deals with vba code that touches on Access Databases.  More often than not i use this for downloading data to an excel spreadsheet, but you will also find functions in here for other functions as well.
