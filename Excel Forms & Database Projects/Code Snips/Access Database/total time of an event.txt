@@ -1,0 +1,60 @@
+
+Sub CalculateRepairTime()
+    Dim conn As Object ' Connection to the database
+    Dim rs As Object ' Recordset to hold the query results
+    Dim sql As String ' SQL query
+    Dim machineName As String ' Machine name from cell B3
+    Dim startTime As Date ' Start time of the current 12-hour shift (6 AM)
+    Dim endTime As Date ' End time of the current 12-hour shift (6 PM)
+    Dim totalRepairMinutes As Long ' Total minutes for 'Repair'
+    Dim dbPath As String ' Path to the Access database
+    
+    
+    dbPath = Sheets("Control").Range("B1").Value ' Update the path to your Access database file
+
+    ' Get the machine name from cell B3 of the "Digital_Work_Record" sheet
+    machineName = Sheets("Digital_Work_Record").Range("B3").Value
+    
+    ' Set the start time to 6 AM today
+    startTime = DateValue(Now) + TimeSerial(6, 0, 0)
+    
+    ' Set the end time to 6 PM today
+    endTime = DateValue(Now) + TimeSerial(18, 0, 0)
+    
+    ' Create a connection to the Access database
+    Set conn = CreateObject("ADODB.Connection")
+    conn.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & dbPath
+    
+    ' Prepare the SQL query to retrieve 'Repair' records and their next record
+    sql = "SELECT Date, " & _
+          "(SELECT TOP 1 Date FROM MWR_History WHERE Machine = T1.Machine AND Date > T1.Date ORDER BY Date) AS NextDate " & _
+          "FROM MWR_History AS T1 " & _
+          "WHERE Machine = '" & machineName & "' " & _
+          "AND RunCode = 'Repair' " & _
+          "AND Date BETWEEN #" & Format(startTime, "yyyy/mm/dd hh:mm:ss") & "# AND #" & Format(endTime, "yyyy/mm/dd hh:mm:ss") & "#;"
+    
+    ' Execute the query and store the result in the recordset
+    Set rs = conn.Execute(sql)
+    
+    ' Initialize total minutes to 0
+    totalRepairMinutes = 0
+    
+    ' Loop through the recordset to calculate total 'Repair' minutes
+    Do While Not rs.EOF
+        If Not IsNull(rs("NextDate")) Then
+            ' Calculate the time difference between current 'Repair' record and the next record
+            totalRepairMinutes = totalRepairMinutes + DateDiff("n", rs("Date"), rs("NextDate"))
+        End If
+        rs.MoveNext
+    Loop
+    
+    ' Close the recordset and connection
+    rs.Close
+    conn.Close
+    
+    ' Display the result
+    Sheets("Digital_Work_Record").Range("I5").Value = totalRepairMinutes
+    
+    'MsgBox "Total Repair Minutes for Machine '" & machineName & "' during the current 12-hour shift: " & totalRepairMinutes, vbInformation, "Repair Time"
+End Sub
+
